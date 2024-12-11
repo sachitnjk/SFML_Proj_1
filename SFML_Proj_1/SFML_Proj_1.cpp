@@ -5,6 +5,17 @@ int main()
 {
 	sf::RenderWindow window(sf::VideoMode(1920, 1080), "First SFML Project");
 
+	sf::Texture playerTexture;
+	sf::Texture enemyTexture;
+	playerTexture.loadFromFile("Images/Player.png");
+	enemyTexture.loadFromFile("Images/Enemy.png");
+
+	sf::Sprite player(playerTexture);
+	sf::Sprite enemy(enemyTexture);
+
+	player.setScale(sf::Vector2f(10, 10));
+	enemy.setScale(sf::Vector2f(10, 10));
+
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -17,6 +28,8 @@ int main()
 		}
 
 		window.clear();
+		window.draw(player);
+		window.draw(enemy);
 		window.display();
 	}
 
