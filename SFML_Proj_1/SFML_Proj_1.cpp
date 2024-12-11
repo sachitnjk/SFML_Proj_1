@@ -1,6 +1,13 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
+sf::Vector2f Normalize(const sf::Vector2f& rVector)
+{
+	float vectorLength = sqrt(rVector.x * rVector.x + rVector.y * rVector.y);
+	sf::Vector2f normalizedVector(rVector.x / vectorLength, rVector.y / vectorLength);
+	return normalizedVector;
+}
+
 int main()
 {
 	sf::RenderWindow window(sf::VideoMode(1920, 1080), "First SFML Project");
@@ -40,8 +47,6 @@ int main()
 			}
 		}
 
-		sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
-		axe.setPosition((sf::Vector2f)mousePosition);
 
 		sf::Vector2f requestedPlayerMovement(0.0f, 0.0f);
 		float fPlayerSpeed = 200;
@@ -65,6 +70,13 @@ int main()
 		
 		//PlayerMovement
 		player.move(requestedPlayerMovement * timeSincelastFrame.asSeconds() * fPlayerSpeed);
+
+		//axe related movemtn asn stuff after player movemnt
+		sf::Vector2f mousePosition = (sf::Vector2f)sf::Mouse::getPosition(window);
+		sf::Vector2f playerToMouse = mousePosition - player.getPosition();
+		sf::Vector2f playerToMouseNormalized = Normalize(playerToMouse);
+
+		axe.setPosition(player.getPosition() + playerToMouseNormalized * 160.0f);
 
 		window.clear();
 		window.draw(player);
