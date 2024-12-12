@@ -1,12 +1,20 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include <random>
+
+float Length(const sf::Vector2f& rVector)
+{
+	float fLength = sqrt(rVector.x * rVector.x + rVector.y * rVector.y);
+	return fLength;
+}
 
 sf::Vector2f Normalize(const sf::Vector2f& rVector)
 {
-	float vectorLength = sqrt(rVector.x * rVector.x + rVector.y * rVector.y);
+	float vectorLength = Length(rVector);
 	sf::Vector2f normalizedVector(rVector.x / vectorLength, rVector.y / vectorLength);
 	return normalizedVector;
 }
+
 
 int main()
 {
@@ -75,13 +83,23 @@ int main()
 		sf::Vector2f mousePosition = (sf::Vector2f)sf::Mouse::getPosition(window);
 		sf::Vector2f playerToMouse = mousePosition - player.getPosition();
 		sf::Vector2f playerToMouseNormalized = Normalize(playerToMouse);
-
 		axe.setPosition(player.getPosition() + playerToMouseNormalized * 160.0f);
 
+		//Did axe hit enemy check
+		sf::Vector2f vAxeToEnemy = enemy.getPosition() - axe.getPosition();
+		float fLengthFromAxeToEnemy = Length(vAxeToEnemy);
+
+		if (fLengthFromAxeToEnemy < 160.0f)
+		{
+			//The axe hits the enemy, the enemy is moved to another(random) point (illusion of respawning enemy)
+			sf::Vector2f vNewEnemyPos(std::rand() % 1920, std::rand() % 1080);
+			enemy.setPosition(vNewEnemyPos);
+		}
+
 		window.clear();
+		window.draw(enemy);
 		window.draw(player);
 		window.draw(axe);
-		window.draw(enemy);
 		window.display();
 	}
 
