@@ -5,7 +5,28 @@
 #include "MathHelpers.h"
 
 Game::Game()
+	: m_Window(sf::VideoMode(1920, 1080), "First SFML Project")
+	, eGameMode(Play)
 {
+
+	enemy_Texture.loadFromFile("Images/Enemy.png");
+	enemy_Sprite.setTexture(enemy_Texture);
+	enemy_Sprite.setScale(sf::Vector2f(10, 10));
+	enemy_Sprite.setPosition(sf::Vector2f(960, 540));
+	enemy_Sprite.setOrigin(sf::Vector2f(8, 8));
+
+	player_Texture;
+	player_Texture.loadFromFile("Images/Player.png");
+	player_Sprite.setTexture(player_Texture);
+	player_Sprite.setScale(sf::Vector2f(10, 10));
+	player_Sprite.setOrigin(sf::Vector2f(8, 8));
+
+
+	axe_Texture;
+	axe_Texture.loadFromFile("Images/Axe.png");
+	axe_Sprite.setTexture(axe_Texture);
+	axe_Sprite.setScale(sf::Vector2f(10, 10));
+	axe_Sprite.setOrigin(sf::Vector2f(8, 8));
 
 }
 
@@ -14,47 +35,39 @@ Game::~Game()
 
 }
 
-bool Game::Update()
+void Game::Run()
 {
-	sf::RenderWindow window(sf::VideoMode(1920, 1080), "First SFML Project");
-
-	sf::Texture enemyTexture;
-	enemyTexture.loadFromFile("Images/Enemy.png");
-	sf::Sprite enemy(enemyTexture);
-	enemy.setScale(sf::Vector2f(10, 10));
-	enemy.setPosition(sf::Vector2f(960, 540));
-	enemy.setOrigin(sf::Vector2f(8, 8));
-
-	sf::Texture playerTexture;
-	playerTexture.loadFromFile("Images/Player.png");
-	sf::Sprite player(playerTexture);
-	player.setScale(sf::Vector2f(10, 10));
-	player.setOrigin(sf::Vector2f(8, 8));
-
-
-	sf::Texture axeTexture;
-	axeTexture.loadFromFile("Images/Axe.png");
-	sf::Sprite axe(axeTexture);
-	axe.setScale(sf::Vector2f(10, 10));
-	axe.setOrigin(sf::Vector2f(8, 8));
-
+	//sf::RenderWindow window;
 	sf::Clock clock;
-
-	while (window.isOpen())
+	while (m_Window.isOpen())
 	{
-		sf::Time timeSincelastFrame = clock.restart();
+		m_DeltaTime = clock.restart();
+
+		switch (eGameMode)
+		{
+		case Play:
+			UpdatePlay();
+		case LevelEditor:
+			UpdateLevelEditor();
+		}
+
+		Draw();
 
 		sf::Event event;
-		while (window.pollEvent(event))
+		while (m_Window.pollEvent(event))
 		{
 			if (event.type == sf::Event::Closed)
 			{
-				window.close();
-				return false;
+				m_Window.close();
 			}
 		}
 
+	}
 
+}
+
+void Game::UpdatePlay()
+{
 		sf::Vector2f requestedPlayerMovement(0.0f, 0.0f);
 		float fPlayerSpeed = 200;
 		//Player Input detection
@@ -76,36 +89,47 @@ bool Game::Update()
 		}
 
 		//PlayerMovement
-		player.move(requestedPlayerMovement * timeSincelastFrame.asSeconds() * fPlayerSpeed);
+		player_Sprite.move(requestedPlayerMovement * m_DeltaTime.asSeconds() * fPlayerSpeed);
 
 		//axe related movemtn asn stuff after player movemnt
-		sf::Vector2f mousePosition = (sf::Vector2f)sf::Mouse::getPosition(window);
-		sf::Vector2f playerToMouse = mousePosition - player.getPosition();
+		sf::Vector2f mousePosition = (sf::Vector2f)sf::Mouse::getPosition(m_Window);
+		sf::Vector2f playerToMouse = mousePosition - player_Sprite.getPosition();
 		sf::Vector2f playerToMouseNormalized = MathHelpers::Normalize(playerToMouse);
-		axe.setPosition(player.getPosition() + playerToMouseNormalized * 160.0f);
+		axe_Sprite.setPosition(player_Sprite.getPosition() + playerToMouseNormalized * 160.0f);
 
 		//Did axe hit enemy check
-		sf::Vector2f vAxeToEnemy = enemy.getPosition() - axe.getPosition();
+		sf::Vector2f vAxeToEnemy = enemy_Sprite.getPosition() - axe_Sprite.getPosition();
 		float fLengthFromAxeToEnemy = MathHelpers::Length(vAxeToEnemy);
 
 		if (fLengthFromAxeToEnemy < 160.0f)
 		{
 			//The axe hits the enemy, the enemy is moved to another(random) point (illusion of respawning enemy)
 			sf::Vector2f vNewEnemyPos(std::rand() % 1920, std::rand() % 1080);
-			enemy.setPosition(vNewEnemyPos);
+			enemy_Sprite.setPosition(vNewEnemyPos);
 		}
 
-		sf::Vector2f vEnemyToPlayer = player.getPosition() - enemy.getPosition();
+		sf::Vector2f vEnemyToPlayer = player_Sprite.getPosition() - enemy_Sprite.getPosition();
 		vEnemyToPlayer = MathHelpers::Normalize(vEnemyToPlayer);
 		float fEnemySpeed = 150.0f;
-		enemy.move(vEnemyToPlayer * timeSincelastFrame.asSeconds() * fEnemySpeed);
+		enemy_Sprite.move(vEnemyToPlayer * m_DeltaTime.asSeconds() * fEnemySpeed);
 
-		window.clear();
-		window.draw(enemy);
-		window.draw(player);
-		window.draw(axe);
-		window.display();
-	}
+		m_Window.clear();
+		m_Window.draw(enemy_Sprite);
+		m_Window.draw(player_Sprite);
+		m_Window.draw(axe_Sprite);
+		m_Window.display();
+}
 
-	return true;
+void Game::UpdateLevelEditor()
+{
+	return;
+}
+
+void Game::Draw()
+{
+	m_Window.clear();
+	m_Window.draw(enemy_Sprite);
+	m_Window.draw(player_Sprite);
+	m_Window.draw(axe_Sprite);
+	m_Window.display();
 }

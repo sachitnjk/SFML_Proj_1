@@ -4,9 +4,7 @@ int main()
 {
 	Game game;
 
-	while (game.Update())
-	{
-	}
+	game.Run();
 
 	return 0;
 }
